@@ -7,9 +7,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.telephony.SmsManager
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -78,14 +78,14 @@ class MainActivity : AppCompatActivity() {
                 val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
                 val intent = Intent(this, MyReceiver::class.java)
                 intent.putExtra("message", editTextMessage.text.toString())
-                intent.putExtra("phone", formatted)
+                intent.putExtra("phone", phoneString)
                 val pendingIntent = PendingIntent.getBroadcast(this, PENDING_INTENT, intent, 0)
 
                 if (btnStart.text.toString() == "Start") {
                     btnStart.text = "Stop"
 
                     val delay = editTextDelay.text.toString().toLong() * 1000 * 60
-                    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, delay, pendingIntent)
+                    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), delay, pendingIntent)
                 } else {
                     btnStart.text = "Start"
                     if (alarmManager != null) {
@@ -119,6 +119,7 @@ class MyReceiver : BroadcastReceiver() {
         val bundle = intent!!.extras
         val message = bundle.getString("message")
         val phone = bundle.getString("phone")
+        SmsManager.getDefault().sendTextMessage(phone, null, message, null, null)
         Toast.makeText(context, "$phone: $message", Toast.LENGTH_SHORT).show()
     }
 }
